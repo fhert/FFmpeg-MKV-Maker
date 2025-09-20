@@ -98,28 +98,55 @@ class MainActivity : AppCompatActivity(), ConversionTask.ConversionListener, FFm
         selectorCarpetaDestino.launch(null)
     }
 
-    private fun iniciarConversion() {
-        if (archivosSeleccionados.isEmpty()) {
-            Toast.makeText(this, "No hay archivos seleccionados", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (pasoActual < 6) {
-            Toast.makeText(this, "Por favor completa todos los pasos de configuración", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        for (archivo in archivosSeleccionados) {
-            val tarea = TareaInfo(
-                nombre = archivo.nombre,
-                estado = Estado.PENDIENTE
-            )
-            tareas.add(tarea)
-        }
-
-        binding.recyclerViewTareas.adapter?.notifyDataSetChanged()
-        Toast.makeText(this, "Conversión iniciada", Toast.LENGTH_SHORT).show()
+private fun iniciarConversion() {
+    if (archivosSeleccionados.isEmpty()) {
+        Toast.makeText(this, "No hay archivos seleccionados", Toast.LENGTH_SHORT).show()
+        return
     }
+
+    // Verificar que todos los pasos estén completados
+    if (pasoActual < 6) {
+        Toast.makeText(this, "Por favor completa todos los pasos de configuración", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    // Crear tareas para cada archivo seleccionado
+    for (archivo in archivosSeleccionados) {
+        val tarea = TareaInfo(
+            nombre = archivo.nombre,
+            estado = Estado.PENDIENTE
+        )
+        tareas.add(tarea)
+    }
+
+    binding.recyclerViewTareas.adapter?.notifyDataSetChanged()
+
+    // Iniciar la conversión del primer archivo
+    convertirSiguienteArchivo()
+}
+
+private fun convertirSiguienteArchivo() {
+    val tareaPendiente = tareas.find { it.estado == Estado.PENDIENTE }
+    if (tareaPendiente != null) {
+        val archivo = archivosSeleccionados.find { it.nombre == tareaPendiente.nombre }
+        if (archivo != null) {
+            tareaPendiente.estado = Estado.PROCESANDO
+            binding.recyclerViewTareas.adapter?.notifyDataSetChanged()
+
+            tareaActual = ConversionTask(
+                context = this,
+                archivo = archivo,
+                configuracion = configuracion,
+                carpetaDestino = carpetaDestinoGlobal,
+                listener = this
+            )
+            tareaActual?.execute()
+        }
+    } else {
+        // Todas las conversiones han finalizado
+        Toast.makeText(this, "Todas las conversiones han finalizado", Toast.LENGTH_SHORT).show()
+    }
+}
 
     override fun onProgress(progreso: String) {
         runOnUiThread {
