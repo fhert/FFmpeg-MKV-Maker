@@ -2,6 +2,8 @@ package com.z.ffmpegmkvmaker
 
 import android.content.Context
 import android.os.AsyncTask
+import com.arthenica.ffmpegkit.FFmpegKit
+import com.arthenica.ffmpegkit.ReturnCode
 
 class ConversionTask(
     private val context: Context,
@@ -18,13 +20,48 @@ class ConversionTask(
     }
 
     override fun doInBackground(vararg params: Void): Boolean {
-        // Simulación de conversión
-        publishProgress("Iniciando conversión...")
-        Thread.sleep(1000)
-        publishProgress("Procesando video...")
-        Thread.sleep(2000)
-        publishProgress("Finalizando conversión...")
-        Thread.sleep(1000)
+        val generator = FFmpegCommandGenerator(context)
+        val comandos = generator.generarComandos(
+            archivo = archivo,
+            configuracion = configuracion,
+            carpetaDestino = carpetaDestino,
+            listener = object : FFmpegCommandGenerator.DuplicadoListener {
+                override fun onDuplicadoDetectado(nombreArchivo: String, carpetaDestino: String) {
+                    // Manejar duplicados si es necesario
+                    publishProgress("Archivo duplicado detectado: $nombreArchivo")
+                }
+            }
+        )
+        
+        if (comandos.isNullOrEmpty()) {
+            publishProgress("Error: No se pudieron generar los comandos")
+            return false
+        }
+        
+        for ((index, comando) in comandos.withIndex()) {
+            val pase = if (index == 0) "primer pase" else "segundo pase"
+            publishProgress("Ejecutando $pase...")
+            publishProgress("Comando: $comando")
+            
+            val session = FFmpegKit.execute(comando)
+            val returnCode = session.returnCode
+            
+            if (ReturnCode.isSuccess(returnCode)) {
+                publishProgress("$pase completado correctamente")
+                
+                // Mostrar estadísticas de la conversión
+                val logs = session.allLogsAsString
+                if (logs.isNotEmpty()) {
+                    publishProgress("Estadísticas: ${logs.take(200)}...") // Mostrar solo los primeros 200 caracteres
+                }
+            } else {
+                val error = session.failStackTrace
+                publishProgress("Error en $pase: $error")
+                listener.onError(error)
+                return false
+            }
+        }
+        
         return true
     }
 
@@ -37,8 +74,6 @@ class ConversionTask(
         super.onPostExecute(result)
         if (result) {
             listener.onComplete()
-        } else {
-            listener.onError("Error en la conversión")
         }
     }
 }
