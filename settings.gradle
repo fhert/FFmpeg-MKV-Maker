@@ -1,14 +1,21 @@
-pluginManagement {
-    repositories {
+pluginManagement { PluginManagementSpec -> // 'it ->' es implícito en Groovy para clausuras de un solo argumento, pero se puede quitar para mayor claridad si no se usa 'it' explícitamente dentro del bloque
+    repositories { // RepositoryHandler ->
         google()
         mavenCentral()
         gradlePluginPortal()
     }
 }
-dependencyResolutionManagement {
+dependencyResolutionManagement { // DependencyResolutionManagement ->
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
+    repositories { // RepositoryHandler ->        google()
         mavenCentral()
     }
 }
+
+// Asegúrate de que el nombre del proyecto raíz sea el deseado
+rootProject.name = "FFmpeg-MKV-Maker"
+
+// Esta es la línea crucial: incluye tu módulo de aplicación.
+// Si tu módulo se llama 'app', mantenlo así.
+// Si tu módulo tiene otro nombre (por ejemplo, 'miApp'), cámbialo a include ':miApp'
+include ':app'
