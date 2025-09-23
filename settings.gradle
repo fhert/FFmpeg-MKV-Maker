@@ -6,12 +6,14 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS) // Opcional, pero bueno para forzar la centralización
     repositories {
         google()
         mavenCentral()
+        // Si necesitas otros repositorios como JitPack, añádelos aquí:
+        // maven { url 'https://jitpack.io' }
     }
 }
-rootProject.name = "FFmpeg-MKV-Maker"
-
-include ':app'
+rootProject.name = "FFmpeg-MKV-Maker" // O como se llame tu proyecto
+include ':app' // Asegúrate de que tu módulo app esté incluido
+    

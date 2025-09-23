@@ -1,14 +1,25 @@
-// Archivo build.gradle (nivel raíz)
 buildscript {
     repositories {
-        // Tells Gradle to look for dependencies in Google's Maven repository
         google()
-        // Tells Gradle to look for dependencies in the Maven Central repository
         mavenCentral()
     }
     dependencies {
-        // Specifies the Android Gradle Plugin version
+        // Plugin de Android
         classpath 'com.android.tools.build:gradle:7.3.0'
-        // Add other buildscript dependencies here if you have them
+        // Plugin de Kotlin (usa versión fija, no variable ext)
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20"
     }
+}
+
+/*
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+*/
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
