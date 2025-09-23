@@ -34,12 +34,13 @@ android {
     buildFeatures {
         viewBinding true
     }
+    packagingOptions {
+        jniLibs {
+            pickFirsts += ['**/libc++_shared.so', '**/libjsc.so']
+        }
+    }
 
     // Configuración para FFmpeg
-    packagingOptions {
-        pickFirst '**/libc++_shared.so'
-        pickFirst '**/libjsc.so'
-    }
 }
 
 dependencies {
